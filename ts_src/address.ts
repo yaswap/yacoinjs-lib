@@ -79,7 +79,7 @@ export function fromOutputScript(output: Buffer, network?: Network): string {
 }
 
 export function toOutputScript(address: string, network?: Network): Buffer {
-  network = network || networks.bitcoin;
+  network = network || networks.yacoin;
 
   let decodeBase58: Base58CheckResult | undefined;
   try {

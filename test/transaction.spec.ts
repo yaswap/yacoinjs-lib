@@ -5,12 +5,12 @@ import * as bscript from '../src/script';
 import * as fixtures from './fixtures/transaction.json';
 
 describe('Transaction', () => {
-  function fromRaw(raw: any, noWitness?: boolean): Transaction {
+  function fromRaw(raw: any): Transaction {
     const tx = new Transaction();
     tx.version = raw.version;
     tx.locktime = raw.locktime;
 
-    raw.ins.forEach((txIn: any, i: number) => {
+    raw.ins.forEach((txIn: any) => {
       const txHash = Buffer.from(txIn.hash, 'hex');
       let scriptSig;
 
@@ -21,14 +21,6 @@ describe('Transaction', () => {
       }
 
       tx.addInput(txHash, txIn.index, txIn.sequence, scriptSig);
-
-      if (!noWitness && txIn.witness) {
-        const witness = txIn.witness.map((x: string) => {
-          return Buffer.from(x, 'hex');
-        });
-
-        tx.setWitness(i, witness);
-      }
     });
 
     raw.outs.forEach((txOut: any) => {
@@ -89,7 +81,7 @@ describe('Transaction', () => {
   describe('toBuffer/toHex', () => {
     fixtures.valid.forEach(f => {
       it('exports ' + f.description + ' (' + f.id + ')', () => {
-        const actual = fromRaw(f.raw, true);
+        const actual = fromRaw(f.raw);
         assert.strictEqual(actual.toHex(), f.hex);
       });
 
@@ -117,21 +109,6 @@ describe('Transaction', () => {
       assert.deepStrictEqual(a, b);
       assert.deepStrictEqual(a, target.slice(0, byteLength));
       assert.deepStrictEqual(b, target.slice(byteLength));
-    });
-  });
-
-  describe('hasWitnesses', () => {
-    fixtures.valid.forEach(f => {
-      it(
-        'detects if the transaction has witnesses: ' +
-          (f.whex ? 'true' : 'false'),
-        () => {
-          assert.strictEqual(
-            Transaction.fromHex(f.whex ? f.whex : f.hex).hasWitnesses(),
-            !!f.whex,
-          );
-        },
-      );
     });
   });
 
@@ -173,7 +150,6 @@ describe('Transaction', () => {
       tx.addInput(prevTxHash, 0);
 
       assert.strictEqual(tx.ins[0].script.length, 0);
-      assert.strictEqual(tx.ins[0].witness.length, 0);
       assert.strictEqual(tx.ins[0].sequence, 0xffffffff);
     });
 
@@ -303,36 +279,6 @@ describe('Transaction', () => {
           );
         },
       );
-    });
-  });
-
-  describe('hashForWitnessV0', () => {
-    fixtures.hashForWitnessV0.forEach(f => {
-      it(
-        'should return ' +
-          f.hash +
-          ' for ' +
-          (f.description ? 'case "' + f.description + '"' : ''),
-        () => {
-          const tx = Transaction.fromHex(f.txHex);
-          const script = bscript.fromASM(f.script);
-
-          assert.strictEqual(
-            tx
-              .hashForWitnessV0(f.inIndex, script, f.value, f.type)
-              .toString('hex'),
-            f.hash,
-          );
-        },
-      );
-    });
-  });
-
-  describe('setWitness', () => {
-    it('only accepts a a witness stack (Array of Buffers)', () => {
-      assert.throws(() => {
-        (new Transaction().setWitness as any)(0, 'foobar');
-      }, /Expected property "1" of type \[Buffer], got String "foobar"/);
     });
   });
 });

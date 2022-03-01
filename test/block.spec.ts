@@ -49,8 +49,7 @@ describe('Block', () => {
         assert.strictEqual(block.nonce, f.nonce);
         assert.strictEqual(!block.transactions, f.hex.length === 160);
         if (f.size && f.strippedSize && f.weight) {
-          assert.strictEqual(block.byteLength(false, true), f.size);
-          assert.strictEqual(block.byteLength(false, false), f.strippedSize);
+          assert.strictEqual(block.byteLength(false), f.strippedSize);
           assert.strictEqual(block.weight(), f.weight);
         }
       });
@@ -133,17 +132,6 @@ describe('Block', () => {
           f.merkleRoot,
         );
       });
-
-      if (f.witnessCommit) {
-        it('returns witness commit ' + f.witnessCommit + ' for ' + f.id, () => {
-          assert.strictEqual(
-            Block.calculateMerkleRoot(block.transactions!, true).toString(
-              'hex',
-            ),
-            f.witnessCommit,
-          );
-        });
-      }
     });
   });
 

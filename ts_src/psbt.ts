@@ -23,7 +23,7 @@ import {
   Signer,
   SignerAsync,
 } from './ecpair';
-import { yacoin as yacNetwork, Network } from './networks';
+import { Network, yacoin as yacNetwork } from './networks';
 import * as payments from './payments';
 import * as bscript from './script';
 import { Output, Transaction } from './transaction';

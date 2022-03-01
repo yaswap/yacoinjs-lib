@@ -99,7 +99,7 @@ describe('Bitcoin-core', () => {
 
       const network = params.isTestnet
         ? bitcoin.networks.testnet
-        : bitcoin.networks.bitcoin;
+        : bitcoin.networks.yacoin;
       const keyPair = bitcoin.ECPair.fromWIF(strng, network);
 
       it('fromWIF imports ' + strng, () => {
@@ -115,10 +115,7 @@ describe('Bitcoin-core', () => {
 
   // base58KeysInvalid
   describe('ECPair.fromWIF', () => {
-    const allowedNetworks = [
-      bitcoin.networks.bitcoin,
-      bitcoin.networks.testnet,
-    ];
+    const allowedNetworks = [bitcoin.networks.yacoin, bitcoin.networks.testnet];
 
     base58KeysInvalid.forEach(f => {
       const strng = f[0];

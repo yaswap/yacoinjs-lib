@@ -1,7 +1,9 @@
 import { yacoin as YACOIN_NETWORK } from '../networks';
+import * as bcrypto from '../crypto';
 import * as bscript from '../script';
 import { Payment, PaymentOpts, StackFunction } from './index';
 import * as lazy from './lazy';
+const bs58check = require('bs58check');
 const typef = require('typeforce');
 const OPS = bscript.OPS;
 const ecc = require('tiny-secp256k1');
@@ -16,6 +18,8 @@ export function p2pk(a: Payment, opts?: PaymentOpts): Payment {
   typef(
     {
       network: typef.maybe(typef.Object),
+      address: typef.maybe(typef.String),
+      hash: typef.maybe(typef.BufferN(20)),
       output: typef.maybe(typef.Buffer),
       pubkey: typef.maybe(ecc.isPoint),
 
@@ -25,6 +29,12 @@ export function p2pk(a: Payment, opts?: PaymentOpts): Payment {
     a,
   );
 
+  const _address = lazy.value(() => {
+    const payload = bs58check.decode(a.address!);
+    const version = payload.readUInt8(0);
+    const hash = payload.slice(1);
+    return { version, hash };
+  });
   const _chunks = lazy.value(() => {
     return bscript.decompile(a.input!);
   }) as StackFunction;
@@ -32,6 +42,18 @@ export function p2pk(a: Payment, opts?: PaymentOpts): Payment {
   const network = a.network || YACOIN_NETWORK;
   const o: Payment = { name: 'p2pk', network };
 
+  lazy.prop(o, 'hash', () => {
+    if (a.address) return _address().hash;
+    if (a.pubkey || o.pubkey) return bcrypto.hash160(a.pubkey! || o.pubkey!);
+  });
+  lazy.prop(o, 'address', () => {
+    if (!o.hash) return;
+
+    const payload = Buffer.allocUnsafe(21);
+    payload.writeUInt8(network.pubKeyHash, 0);
+    o.hash.copy(payload, 1);
+    return bs58check.encode(payload);
+  });
   lazy.prop(o, 'output', () => {
     if (!a.pubkey) return;
     return bscript.compile([a.pubkey, OPS.OP_CHECKSIG]);

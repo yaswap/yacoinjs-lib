@@ -45,6 +45,9 @@ function fromOutputScript(output, network) {
   // TODO: Network
   network = network || networks.yacoin;
   try {
+    return payments.p2pk({ output, network }).address;
+  } catch (e) {}
+  try {
     return payments.p2pkh({ output, network }).address;
   } catch (e) {}
   try {

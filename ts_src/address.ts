@@ -69,6 +69,9 @@ export function fromOutputScript(output: Buffer, network?: Network): string {
   network = network || networks.yacoin;
 
   try {
+    return payments.p2pk({ output, network }).address as string;
+  } catch (e) {}
+  try {
     return payments.p2pkh({ output, network }).address as string;
   } catch (e) {}
   try {

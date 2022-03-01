@@ -7,7 +7,6 @@ export interface Input {
     index: number;
     script: Buffer;
     sequence: number;
-    witness: Buffer[];
 }
 export declare class Transaction {
     static readonly DEFAULT_SEQUENCE = 4294967295;
@@ -21,16 +20,16 @@ export declare class Transaction {
     static fromHex(hex: string): Transaction;
     static isCoinbaseHash(buffer: Buffer): boolean;
     version: number;
+    time: number;
     locktime: number;
     ins: Input[];
     outs: Output[];
     isCoinbase(): boolean;
     addInput(hash: Buffer, index: number, sequence?: number, scriptSig?: Buffer): number;
     addOutput(scriptPubKey: Buffer, value: number): number;
-    hasWitnesses(): boolean;
     weight(): number;
     virtualSize(): number;
-    byteLength(_ALLOW_WITNESS?: boolean): number;
+    byteLength(): number;
     clone(): Transaction;
     /**
      * Hash transaction for signing a specific input.
@@ -41,12 +40,10 @@ export declare class Transaction {
      * This hash can then be used to sign the provided transaction input.
      */
     hashForSignature(inIndex: number, prevOutScript: Buffer, hashType: number): Buffer;
-    hashForWitnessV0(inIndex: number, prevOutScript: Buffer, value: number, hashType: number): Buffer;
-    getHash(forWitness?: boolean): Buffer;
+    getHash(): Buffer;
     getId(): string;
     toBuffer(buffer?: Buffer, initialOffset?: number): Buffer;
     toHex(): string;
     setInputScript(index: number, scriptSig: Buffer): void;
-    setWitness(index: number, witness: Buffer[]): void;
     private __toBuffer;
 }

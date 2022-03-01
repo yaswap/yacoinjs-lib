@@ -13,23 +13,7 @@ function varSliceSize(someScript: Buffer): number {
   return varuint.encodingLength(length) + length;
 }
 
-function vectorSize(someVector: Buffer[]): number {
-  const length = someVector.length;
-
-  return (
-    varuint.encodingLength(length) +
-    someVector.reduce((sum, witness) => {
-      return sum + varSliceSize(witness);
-    }, 0)
-  );
-}
-
 const EMPTY_SCRIPT: Buffer = Buffer.allocUnsafe(0);
-const EMPTY_WITNESS: Buffer[] = [];
-const ZERO: Buffer = Buffer.from(
-  '0000000000000000000000000000000000000000000000000000000000000000',
-  'hex',
-);
 const ONE: Buffer = Buffer.from(
   '0000000000000000000000000000000000000000000000000000000000000001',
   'hex',
@@ -178,8 +162,8 @@ export class Transaction {
   }
 
   weight(): number {
-    const base = this.byteLength(false);
-    const total = this.byteLength(true);
+    const base = this.byteLength();
+    const total = this.byteLength();
     return base * 3 + total;
   }
 
@@ -303,9 +287,9 @@ export class Transaction {
     }
 
     // serialize and hash
-    const buffer: Buffer = Buffer.allocUnsafe(txTmp.byteLength(false) + 4);
+    const buffer: Buffer = Buffer.allocUnsafe(txTmp.byteLength() + 4);
     buffer.writeInt32LE(hashType, buffer.length - 4);
-    txTmp.__toBuffer(buffer, 0, false);
+    txTmp.__toBuffer(buffer, 0);
 
     return bcrypto.hash256(buffer);
   }
@@ -318,11 +302,11 @@ export class Transaction {
 
   getId(): string {
     // transaction hash's are displayed in reverse order
-    return reverseBuffer(this.getHash(false)).toString('hex');
+    return reverseBuffer(this.getHash()).toString('hex');
   }
 
   toBuffer(buffer?: Buffer, initialOffset?: number): Buffer {
-    return this.__toBuffer(buffer, initialOffset, true);
+    return this.__toBuffer(buffer, initialOffset);
   }
 
   toHex(): string {

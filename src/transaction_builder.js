@@ -49,7 +49,7 @@ function txIsTransaction(tx) {
 class TransactionBuilder {
   // WARNING: maximumFeeRate is __NOT__ to be relied on,
   //          it's just another potential safety mechanism (safety in-depth)
-  constructor(network = networks.bitcoin, maximumFeeRate = 2500) {
+  constructor(network = networks.yacoin, maximumFeeRate = 2500) {
     this.network = network;
     this.maximumFeeRate = maximumFeeRate;
     this.__PREV_TX_SET = {};
@@ -79,7 +79,6 @@ class TransactionBuilder {
       txb.__addInputUnsafe(txIn.hash, txIn.index, {
         sequence: txIn.sequence,
         script: txIn.script,
-        witness: txIn.witness,
       });
     });
     // fix some things not possible through the public API
@@ -128,7 +127,7 @@ class TransactionBuilder {
       const txOut = txHash.outs[vout];
       prevOutScript = txOut.script;
       value = txOut.value;
-      txHash = txHash.getHash(false);
+      txHash = txHash.getHash();
     }
     return this.__addInputUnsafe(txHash, vout, {
       sequence,
@@ -234,7 +233,6 @@ class TransactionBuilder {
         return;
       }
       tx.setInputScript(i, result.input);
-      tx.setWitness(i, result.witness);
     });
     if (!allowIncomplete) {
       // do not rely on this, its merely a last resort
@@ -533,7 +531,6 @@ function prepareInput(input, ourPubKey, redeemScript, witnessScript) {
       witnessScriptType: expanded.type,
       prevOutType: SCRIPT_TYPES.P2SH,
       prevOutScript: p2sh.output,
-      hasWitness: true,
       signScript,
       signType: expanded.type,
       pubkeys: expanded.pubkeys,
@@ -573,7 +570,6 @@ function prepareInput(input, ourPubKey, redeemScript, witnessScript) {
       redeemScriptType: expanded.type,
       prevOutType: SCRIPT_TYPES.P2SH,
       prevOutScript: p2sh.output,
-      hasWitness: expanded.type === SCRIPT_TYPES.P2WPKH,
       signScript,
       signType: expanded.type,
       pubkeys: expanded.pubkeys,
@@ -607,7 +603,6 @@ function prepareInput(input, ourPubKey, redeemScript, witnessScript) {
       witnessScriptType: expanded.type,
       prevOutType: SCRIPT_TYPES.P2WSH,
       prevOutScript: p2wsh.output,
-      hasWitness: true,
       signScript,
       signType: expanded.type,
       pubkeys: expanded.pubkeys,
@@ -644,7 +639,6 @@ function prepareInput(input, ourPubKey, redeemScript, witnessScript) {
     return {
       prevOutType: expanded.type,
       prevOutScript: input.prevOutScript,
-      hasWitness: expanded.type === SCRIPT_TYPES.P2WPKH,
       signScript,
       signType: expanded.type,
       pubkeys: expanded.pubkeys,
@@ -656,7 +650,6 @@ function prepareInput(input, ourPubKey, redeemScript, witnessScript) {
   return {
     prevOutType: SCRIPT_TYPES.P2PKH,
     prevOutScript,
-    hasWitness: false,
     signScript: prevOutScript,
     signType: SCRIPT_TYPES.P2PKH,
     pubkeys: [ourPubKey],
@@ -728,8 +721,7 @@ function canSign(input) {
     input.pubkeys !== undefined &&
     input.signatures !== undefined &&
     input.signatures.length === input.pubkeys.length &&
-    input.pubkeys.length > 0 &&
-    (input.hasWitness === false || input.value !== undefined)
+    input.pubkeys.length > 0
   );
 }
 function signatureHashType(buffer) {
@@ -956,12 +948,6 @@ function trySign({
   for (const [i, pubKey] of input.pubkeys.entries()) {
     if (!ourPubKey.equals(pubKey)) continue;
     if (input.signatures[i]) throw new Error('Signature already exists');
-    // TODO: add tests
-    if (ourPubKey.length !== 33 && input.hasWitness) {
-      throw new Error(
-        'BIP143 rejects uncompressed public keys in P2WPKH or P2WSH',
-      );
-    }
     const signature = keyPair.sign(signatureHash, useLowR);
     input.signatures[i] = bscript.signature.encode(signature, hashType);
     signed = true;
@@ -1044,16 +1030,7 @@ function getSigningData(
   }
   // ready to sign
   let signatureHash;
-  if (input.hasWitness) {
-    signatureHash = tx.hashForWitnessV0(
-      vin,
-      input.signScript,
-      input.value,
-      hashType,
-    );
-  } else {
-    signatureHash = tx.hashForSignature(vin, input.signScript, hashType);
-  }
+  signatureHash = tx.hashForSignature(vin, input.signScript, hashType);
   return {
     input,
     ourPubKey,

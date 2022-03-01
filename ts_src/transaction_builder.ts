@@ -46,7 +46,6 @@ type TxbScript = Buffer;
 
 interface TxbInput {
   value?: number;
-  hasWitness?: boolean;
   signScript?: TxbScript;
   signType?: TxbScriptType;
   prevOutScript?: TxbScript;
@@ -118,7 +117,6 @@ export class TransactionBuilder {
       txb.__addInputUnsafe(txIn.hash, txIn.index, {
         sequence: txIn.sequence,
         script: txIn.script,
-        witness: txIn.witness,
       });
     });
 
@@ -138,7 +136,7 @@ export class TransactionBuilder {
   // WARNING: maximumFeeRate is __NOT__ to be relied on,
   //          it's just another potential safety mechanism (safety in-depth)
   constructor(
-    public network: Network = networks.bitcoin,
+    public network: Network = networks.yacoin,
     public maximumFeeRate: number = 2500,
   ) {
     this.__PREV_TX_SET = {};
@@ -211,7 +209,7 @@ export class TransactionBuilder {
       prevOutScript = txOut.script;
       value = (txOut as Output).value;
 
-      txHash = txHash.getHash(false) as Buffer;
+      txHash = txHash.getHash() as Buffer;
     }
 
     return this.__addInputUnsafe(txHash, vout, {
@@ -343,7 +341,6 @@ export class TransactionBuilder {
       }
 
       tx.setInputScript(i, result.input!);
-      tx.setWitness(i, result.witness!);
     });
 
     if (!allowIncomplete) {
@@ -715,7 +712,6 @@ function prepareInput(
       prevOutType: SCRIPT_TYPES.P2SH,
       prevOutScript: p2sh.output,
 
-      hasWitness: true,
       signScript,
       signType: expanded.type,
 
@@ -763,7 +759,6 @@ function prepareInput(
       prevOutType: SCRIPT_TYPES.P2SH,
       prevOutScript: p2sh.output,
 
-      hasWitness: expanded.type === SCRIPT_TYPES.P2WPKH,
       signScript,
       signType: expanded.type,
 
@@ -805,7 +800,6 @@ function prepareInput(
       prevOutType: SCRIPT_TYPES.P2WSH,
       prevOutScript: p2wsh.output,
 
-      hasWitness: true,
       signScript,
       signType: expanded.type,
 
@@ -849,7 +843,6 @@ function prepareInput(
       prevOutType: expanded.type,
       prevOutScript: input.prevOutScript,
 
-      hasWitness: expanded.type === SCRIPT_TYPES.P2WPKH,
       signScript,
       signType: expanded.type,
 
@@ -864,7 +857,6 @@ function prepareInput(
     prevOutType: SCRIPT_TYPES.P2PKH,
     prevOutScript,
 
-    hasWitness: false,
     signScript: prevOutScript,
     signType: SCRIPT_TYPES.P2PKH,
 
@@ -950,8 +942,7 @@ function canSign(input: TxbInput): boolean {
     input.pubkeys !== undefined &&
     input.signatures !== undefined &&
     input.signatures.length === input.pubkeys.length &&
-    input.pubkeys.length > 0 &&
-    (input.hasWitness === false || input.value !== undefined)
+    input.pubkeys.length > 0
   );
 }
 
@@ -1182,13 +1173,6 @@ function trySign({
     if (!ourPubKey.equals(pubKey!)) continue;
     if (input.signatures![i]) throw new Error('Signature already exists');
 
-    // TODO: add tests
-    if (ourPubKey.length !== 33 && input.hasWitness) {
-      throw new Error(
-        'BIP143 rejects uncompressed public keys in P2WPKH or P2WSH',
-      );
-    }
-
     const signature = keyPair.sign(signatureHash, useLowR);
     input.signatures![i] = bscript.signature.encode(signature, hashType);
     signed = true;
@@ -1292,20 +1276,11 @@ function getSigningData(
 
   // ready to sign
   let signatureHash: Buffer;
-  if (input.hasWitness) {
-    signatureHash = tx.hashForWitnessV0(
-      vin,
-      input.signScript as Buffer,
-      input.value as number,
-      hashType,
-    );
-  } else {
-    signatureHash = tx.hashForSignature(
-      vin,
-      input.signScript as Buffer,
-      hashType,
-    );
-  }
+  signatureHash = tx.hashForSignature(
+    vin,
+    input.signScript as Buffer,
+    hashType,
+  );
 
   return {
     input,

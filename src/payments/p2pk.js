@@ -1,7 +1,7 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
-const networks_1 = require('../networks');
 const bcrypto = require('../crypto');
+const networks_1 = require('../networks');
 const bscript = require('../script');
 const lazy = require('./lazy');
 const bs58check = require('bs58check');

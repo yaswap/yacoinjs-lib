@@ -1,5 +1,5 @@
-import { yacoin as YACOIN_NETWORK } from '../networks';
 import * as bcrypto from '../crypto';
+import { yacoin as YACOIN_NETWORK } from '../networks';
 import * as bscript from '../script';
 import { Payment, PaymentOpts, StackFunction } from './index';
 import * as lazy from './lazy';

@@ -59,15 +59,11 @@ export class Block {
     return target;
   }
 
-  static calculateMerkleRoot(
-    transactions: Transaction[]
-  ): Buffer {
+  static calculateMerkleRoot(transactions: Transaction[]): Buffer {
     typeforce([{ getHash: types.Function }], transactions);
     if (transactions.length === 0) throw errorMerkleNoTxes;
 
-    const hashes = transactions.map(transaction =>
-      transaction.getHash(),
-    );
+    const hashes = transactions.map(transaction => transaction.getHash());
 
     const rootHash = fastMerkleRoot(hashes, bcrypto.hash256);
 
@@ -146,9 +142,7 @@ export class Block {
   }
 
   checkTxRoots(): boolean {
-    return (
-      this.__checkMerkleRoot()
-    );
+    return this.__checkMerkleRoot();
   }
 
   checkProofOfWork(): boolean {

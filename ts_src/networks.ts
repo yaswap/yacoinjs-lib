@@ -21,8 +21,8 @@ export const yacoin: Network = {
     public: 0x0488b21e,
     private: 0x0488ade4,
   },
-  pubKeyHash: 0x4D,
-  scriptHash: 0x8B,
+  pubKeyHash: 0x4d,
+  scriptHash: 0x8b,
   wif: 0x80,
 };
 export const regtest: Network = {

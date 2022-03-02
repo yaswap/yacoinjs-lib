@@ -319,21 +319,17 @@ export class Transaction {
     this.ins[index].script = scriptSig;
   }
 
-  private __toBuffer(
-    buffer?: Buffer,
-    initialOffset?: number,
-  ): Buffer {
-    if (!buffer)
-      buffer = Buffer.allocUnsafe(this.byteLength()) as Buffer;
+  private __toBuffer(buffer?: Buffer, initialOffset?: number): Buffer {
+    if (!buffer) buffer = Buffer.allocUnsafe(this.byteLength()) as Buffer;
 
     const bufferWriter = new BufferWriter(buffer, initialOffset || 0);
 
     bufferWriter.writeInt32(this.version);
 
     if (this.version >= 2) {
-      bufferWriter.writeUInt64(this.time)
+      bufferWriter.writeUInt64(this.time);
     } else {
-      bufferWriter.writeUInt32(this.time)
+      bufferWriter.writeUInt32(this.time);
     }
 
     bufferWriter.writeVarInt(this.ins.length);

@@ -371,7 +371,7 @@ export class Psbt {
       script,
       inputIndex,
       'input',
-      input.redeemScript || redeemFromFinalScriptSig(input.finalScriptSig)
+      input.redeemScript || redeemFromFinalScriptSig(input.finalScriptSig),
     );
     const type = result.type === 'raw' ? '' : result.type + '-';
     const mainType = classifyScript(result.meaningfulScript);
@@ -1020,9 +1020,7 @@ function checkScriptForPubkey(
 
 function checkTxEmpty(tx: Transaction): void {
   const isEmpty = tx.ins.every(
-    input =>
-      input.script &&
-      input.script.length === 0,
+    input => input.script && input.script.length === 0,
   );
   if (!isEmpty) {
     throw new Error('Format Error: Transaction ScriptSigs are not empty');
@@ -1275,11 +1273,7 @@ function getHashForSig(
         'BIP174 compliant.\n*********************\nPROCEED WITH CAUTION!\n' +
         '*********************',
     );
-  hash = unsignedTx.hashForSignature(
-    inputIndex,
-    meaningfulScript,
-    sighashType,
-  );
+  hash = unsignedTx.hashForSignature(inputIndex, meaningfulScript, sighashType);
 
   return {
     script: meaningfulScript,

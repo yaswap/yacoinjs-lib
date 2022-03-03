@@ -125,7 +125,13 @@ class Transaction {
       varuint.encodingLength(this.ins.length) +
       varuint.encodingLength(this.outs.length) +
       this.ins.reduce((sum, input) => {
-        return sum + 40 + varSliceSize(input.script);
+        return (
+          sum +
+          40 +
+          (this.version >= 2 && !this.isCoinbase()
+            ? 1
+            : varSliceSize(input.script))
+        );
       }, 0) +
       this.outs.reduce((sum, output) => {
         return sum + 8 + varSliceSize(output.script);
@@ -218,9 +224,8 @@ class Transaction {
     return bcrypto.hash256(buffer);
   }
   getHash() {
-    // wtxid for coinbase is always 32 bytes of 0x00
-    if (this.isCoinbase()) return Buffer.alloc(32, 0);
-    return bcrypto.hash256(this.__toBuffer(undefined, undefined));
+    const buffer = this.__toBuffer(undefined, undefined);
+    return bcrypto.hash256(buffer);
   }
   getId() {
     // transaction hash's are displayed in reverse order
@@ -252,7 +257,11 @@ class Transaction {
     this.ins.forEach(txIn => {
       bufferWriter.writeSlice(txIn.hash);
       bufferWriter.writeUInt32(txIn.index);
-      bufferWriter.writeVarSlice(txIn.script);
+      if (this.version >= 2 && !this.isCoinbase()) {
+        bufferWriter.writeUInt8(0);
+      } else {
+        bufferWriter.writeVarSlice(txIn.script);
+      }
       bufferWriter.writeUInt32(txIn.sequence);
     });
     bufferWriter.writeVarInt(this.outs.length);

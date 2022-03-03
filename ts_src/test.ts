@@ -34,3 +34,5 @@ bjsTx.outs.forEach((output, n) => {
     yacoin.address.fromOutputScript(output.script, yacoin.networks.yacoin),
   );
 });
+
+console.log('txid = ', bjsTx.getHash().reverse().toString('hex'))

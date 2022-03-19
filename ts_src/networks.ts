@@ -23,7 +23,7 @@ export const yacoin: Network = {
   },
   pubKeyHash: 0x4d,
   scriptHash: 0x8b,
-  wif: 0x80,
+  wif: 0xcd,
 };
 export const regtest: Network = {
   messagePrefix: '\x18Yacoin Signed Message:\n',

@@ -171,13 +171,13 @@ export class Transaction {
     return Math.ceil(this.weight() / 4);
   }
 
-  byteLength(): number {
+  byteLength(isGetHash: boolean = false): number {
     return (
       (this.version >= 2 ? 16 : 12) +
       varuint.encodingLength(this.ins.length) +
       varuint.encodingLength(this.outs.length) +
       this.ins.reduce((sum, input) => {
-        return sum + 40 + (this.version >= 2 && !this.isCoinbase() ? 1 : varSliceSize(input.script));
+        return sum + 40 + (this.version >= 2 && isGetHash && !this.isCoinbase() ? 1 : varSliceSize(input.script));
       }, 0) +
       this.outs.reduce((sum, output) => {
         return sum + 8 + varSliceSize(output.script);
@@ -289,13 +289,13 @@ export class Transaction {
     // serialize and hash
     const buffer: Buffer = Buffer.allocUnsafe(txTmp.byteLength() + 4);
     buffer.writeInt32LE(hashType, buffer.length - 4);
-    txTmp.__toBuffer(buffer, 0);
+    txTmp.__toBuffer(false, buffer, 0);
 
     return bcrypto.hash256(buffer);
   }
 
   getHash(): Buffer {
-    const buffer = this.__toBuffer(undefined, undefined)
+    const buffer = this.__toBuffer(true, undefined, undefined)
     return bcrypto.hash256(buffer);
   }
 
@@ -305,7 +305,7 @@ export class Transaction {
   }
 
   toBuffer(buffer?: Buffer, initialOffset?: number): Buffer {
-    return this.__toBuffer(buffer, initialOffset);
+    return this.__toBuffer(false, buffer, initialOffset);
   }
 
   toHex(): string {
@@ -318,8 +318,8 @@ export class Transaction {
     this.ins[index].script = scriptSig;
   }
 
-  private __toBuffer(buffer?: Buffer, initialOffset?: number): Buffer {
-    if (!buffer) buffer = Buffer.allocUnsafe(this.byteLength()) as Buffer;
+  private __toBuffer(isGetHash: boolean, buffer?: Buffer, initialOffset?: number): Buffer {
+    if (isGetHash || !buffer) buffer = Buffer.allocUnsafe(this.byteLength(isGetHash)) as Buffer;
 
     const bufferWriter = new BufferWriter(buffer, initialOffset || 0);
 
@@ -336,7 +336,7 @@ export class Transaction {
     this.ins.forEach(txIn => {
       bufferWriter.writeSlice(txIn.hash);
       bufferWriter.writeUInt32(txIn.index);
-      if (this.version >= 2 && !this.isCoinbase()) {
+      if (this.version >= 2 && isGetHash && !this.isCoinbase()) {
         bufferWriter.writeUInt8(0);
       } else {
         bufferWriter.writeVarSlice(txIn.script);

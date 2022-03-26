@@ -107,7 +107,7 @@ export class Transaction {
   }
 
   version: number = 1;
-  time: number = Date.now() / 1000;
+  time: number = Math.round(Date.now() / 1000);
   locktime: number = 0;
   ins: Input[] = [];
   outs: Output[] = [];

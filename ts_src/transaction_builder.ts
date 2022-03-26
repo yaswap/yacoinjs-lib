@@ -106,6 +106,7 @@ export class TransactionBuilder {
     // Copy transaction fields
     txb.setVersion(transaction.version);
     txb.setLockTime(transaction.locktime);
+    txb.setTime(transaction.time);
 
     // Copy outputs (done first to avoid signature invalidation)
     transaction.outs.forEach(txOut => {
@@ -184,6 +185,11 @@ export class TransactionBuilder {
 
     // XXX: this might eventually become more complex depending on what the versions represent
     this.__TX.version = version;
+  }
+
+  setTime(time: number): void {
+    // XXX: this might eventually become more complex depending on what the versions represent
+    this.__TX.time = time;
   }
 
   addInput(

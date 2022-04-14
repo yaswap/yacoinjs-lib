@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export interface Output {
     script: Buffer;
     value: number;
@@ -29,7 +30,7 @@ export declare class Transaction {
     addOutput(scriptPubKey: Buffer, value: number): number;
     weight(): number;
     virtualSize(): number;
-    byteLength(): number;
+    byteLength(isGetHash?: boolean): number;
     clone(): Transaction;
     /**
      * Hash transaction for signing a specific input.

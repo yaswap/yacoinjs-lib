@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
+exports.testnet = exports.regtest = exports.yacoin = void 0;
 exports.yacoin = {
   messagePrefix: '\x18Yacoin Signed Message:\n',
   bech32: 'bc',
@@ -9,7 +10,7 @@ exports.yacoin = {
   },
   pubKeyHash: 0x4d,
   scriptHash: 0x8b,
-  wif: 0x80,
+  wif: 0xcd,
 };
 exports.regtest = {
   messagePrefix: '\x18Yacoin Signed Message:\n',

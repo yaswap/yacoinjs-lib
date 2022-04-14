@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
+exports.Transaction = void 0;
 const bufferutils_1 = require('./bufferutils');
 const bcrypto = require('./crypto');
 const bscript = require('./script');
@@ -27,7 +28,7 @@ function isOutput(out) {
 class Transaction {
   constructor() {
     this.version = 1;
-    this.time = Date.now() / 1000;
+    this.time = Math.round(Date.now() / 1000);
     this.locktime = 0;
     this.ins = [];
     this.outs = [];
@@ -119,7 +120,7 @@ class Transaction {
   virtualSize() {
     return Math.ceil(this.weight() / 4);
   }
-  byteLength() {
+  byteLength(isGetHash = false) {
     return (
       (this.version >= 2 ? 16 : 12) +
       varuint.encodingLength(this.ins.length) +
@@ -128,7 +129,7 @@ class Transaction {
         return (
           sum +
           40 +
-          (this.version >= 2 && !this.isCoinbase()
+          (this.version >= 2 && isGetHash && !this.isCoinbase()
             ? 1
             : varSliceSize(input.script))
         );
@@ -220,19 +221,19 @@ class Transaction {
     // serialize and hash
     const buffer = Buffer.allocUnsafe(txTmp.byteLength() + 4);
     buffer.writeInt32LE(hashType, buffer.length - 4);
-    txTmp.__toBuffer(buffer, 0);
+    txTmp.__toBuffer(false, buffer, 0);
     return bcrypto.hash256(buffer);
   }
   getHash() {
-    const buffer = this.__toBuffer(undefined, undefined);
+    const buffer = this.__toBuffer(true, undefined, undefined);
     return bcrypto.hash256(buffer);
   }
   getId() {
     // transaction hash's are displayed in reverse order
-    return bufferutils_1.reverseBuffer(this.getHash()).toString('hex');
+    return (0, bufferutils_1.reverseBuffer)(this.getHash()).toString('hex');
   }
   toBuffer(buffer, initialOffset) {
-    return this.__toBuffer(buffer, initialOffset);
+    return this.__toBuffer(false, buffer, initialOffset);
   }
   toHex() {
     return this.toBuffer(undefined, undefined).toString('hex');
@@ -241,8 +242,9 @@ class Transaction {
     typeforce(types.tuple(types.Number, types.Buffer), arguments);
     this.ins[index].script = scriptSig;
   }
-  __toBuffer(buffer, initialOffset) {
-    if (!buffer) buffer = Buffer.allocUnsafe(this.byteLength());
+  __toBuffer(isGetHash, buffer, initialOffset) {
+    if (isGetHash || !buffer)
+      buffer = Buffer.allocUnsafe(this.byteLength(isGetHash));
     const bufferWriter = new bufferutils_1.BufferWriter(
       buffer,
       initialOffset || 0,
@@ -257,7 +259,7 @@ class Transaction {
     this.ins.forEach(txIn => {
       bufferWriter.writeSlice(txIn.hash);
       bufferWriter.writeUInt32(txIn.index);
-      if (this.version >= 2 && !this.isCoinbase()) {
+      if (this.version >= 2 && isGetHash && !this.isCoinbase()) {
         bufferWriter.writeUInt8(0);
       } else {
         bufferWriter.writeVarSlice(txIn.script);
@@ -280,6 +282,7 @@ class Transaction {
     return buffer;
   }
 }
+exports.Transaction = Transaction;
 // * Basic transaction serialization format:
 // * - int32_t nVersion
 // * - uint32_t nTime (or uint64_t if nVersion >= 2)
@@ -293,4 +296,3 @@ Transaction.SIGHASH_SINGLE = 0x03;
 Transaction.SIGHASH_ANYONECANPAY = 0x80;
 Transaction.ADVANCED_TRANSACTION_MARKER = 0x00;
 Transaction.ADVANCED_TRANSACTION_FLAG = 0x01;
-exports.Transaction = Transaction;

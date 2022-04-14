@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
+exports.oneOf = exports.Null = exports.BufferN = exports.Function = exports.UInt64 = exports.UInt32 = exports.UInt8 = exports.tuple = exports.maybe = exports.Hex = exports.Buffer = exports.String = exports.Boolean = exports.Array = exports.Number = exports.Hash256bit = exports.Hash160bit = exports.Buffer256bit = exports.Network = exports.ECPoint = exports.Satoshi = exports.Signer = exports.BIP32Path = exports.UInt31 = void 0;
 const typeforce = require('typeforce');
 const UINT31_MAX = Math.pow(2, 31) - 1;
 function UInt31(value) {
@@ -52,6 +53,7 @@ exports.maybe = typeforce.maybe;
 exports.tuple = typeforce.tuple;
 exports.UInt8 = typeforce.UInt8;
 exports.UInt32 = typeforce.UInt32;
+exports.UInt64 = typeforce.UInt64;
 exports.Function = typeforce.Function;
 exports.BufferN = typeforce.BufferN;
 exports.Null = typeforce.Null;

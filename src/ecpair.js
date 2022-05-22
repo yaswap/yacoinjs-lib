@@ -39,8 +39,10 @@ class ECPair {
     if (!this.__D) throw new Error('Missing private key');
     if (lowR === undefined) lowR = this.lowR;
     if (lowR === false) {
+      console.log('TACA ===> calling sign 1');
       return ecc.sign(hash, this.__D);
     } else {
+      console.log('TACA ===> calling sign 2');
       let sig = ecc.sign(hash, this.__D);
       const extraData = Buffer.alloc(32, 0);
       let counter = 0;
@@ -49,6 +51,7 @@ class ECPair {
       while (sig[0] > 0x7f) {
         counter++;
         extraData.writeUIntLE(counter, 0, 6);
+        console.log('TACA ===> calling sign 3');
         sig = ecc.signWithEntropy(hash, this.__D, extraData);
       }
       return sig;

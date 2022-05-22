@@ -27,7 +27,7 @@ function isOutput(out) {
 }
 class Transaction {
   constructor() {
-    this.version = 1;
+    this.version = 2;
     this.time = Math.round(Date.now() / 1000);
     this.locktime = 0;
     this.ins = [];

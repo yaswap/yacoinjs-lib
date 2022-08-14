@@ -1,18 +1,18 @@
 {
-  "name": "yacoinjs-lib",
+  "name": "@yac-swap/yacoinjs-lib",
   "version": "1.0.0",
-  "description": "Client-side Bitcoin JavaScript library",
+  "description": "Client-side Yacoin JavaScript library",
   "main": "./src/index.js",
   "types": "./types/index.d.ts",
   "engines": {
     "node": ">=8.0.0"
   },
   "keywords": [
-    "bitcoinjs",
+    "yacoinjs",
     "bitcoin",
     "browserify",
     "javascript",
-    "bitcoinjs"
+    "yac-swap"
   ],
   "scripts": {
     "build": "npm run clean && tsc -p ./tsconfig.json && npm run formatjs",
@@ -42,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitcoinjs/bitcoinjs-lib.git"
+    "url": "https://github.com/yacswap/yacoinjs-lib.git"
   },
   "files": [
     "src",

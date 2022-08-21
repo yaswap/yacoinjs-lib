@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Psbt as PsbtBase } from 'bip174';
 import { KeyValue, PsbtGlobalUpdate, PsbtInput, PsbtInputUpdate, PsbtOutput, PsbtOutputUpdate, TransactionInput, TransactionOutput } from 'bip174/src/lib/interfaces';
 import { Signer, SignerAsync } from './ecpair';
@@ -50,13 +49,11 @@ export declare class Psbt {
     private __CACHE;
     private opts;
     constructor(opts?: PsbtOptsOptional, data?: PsbtBase);
-    get inputCount(): number;
-    get version(): number;
-    set version(version: number);
-    get locktime(): number;
-    set locktime(locktime: number);
-    get txInputs(): PsbtTxInput[];
-    get txOutputs(): PsbtTxOutput[];
+    readonly inputCount: number;
+    version: number;
+    locktime: number;
+    readonly txInputs: PsbtTxInput[];
+    readonly txOutputs: PsbtTxOutput[];
     combine(...those: Psbt[]): this;
     clone(): Psbt;
     setMaximumFeeRate(satoshiPerByte: number): void;

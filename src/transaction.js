@@ -1,6 +1,5 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
-exports.Transaction = void 0;
 const bufferutils_1 = require('./bufferutils');
 const bcrypto = require('./crypto');
 const bscript = require('./script');
@@ -230,7 +229,7 @@ class Transaction {
   }
   getId() {
     // transaction hash's are displayed in reverse order
-    return (0, bufferutils_1.reverseBuffer)(this.getHash()).toString('hex');
+    return bufferutils_1.reverseBuffer(this.getHash()).toString('hex');
   }
   toBuffer(buffer, initialOffset) {
     return this.__toBuffer(false, buffer, initialOffset);
@@ -282,7 +281,6 @@ class Transaction {
     return buffer;
   }
 }
-exports.Transaction = Transaction;
 // * Basic transaction serialization format:
 // * - int32_t nVersion
 // * - uint32_t nTime (or uint64_t if nVersion >= 2)
@@ -296,3 +294,4 @@ Transaction.SIGHASH_SINGLE = 0x03;
 Transaction.SIGHASH_ANYONECANPAY = 0x80;
 Transaction.ADVANCED_TRANSACTION_MARKER = 0x00;
 Transaction.ADVANCED_TRANSACTION_FLAG = 0x01;
+exports.Transaction = Transaction;

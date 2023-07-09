@@ -63,6 +63,16 @@ interface TxbInput {
   maxSignatures?: number;
 }
 
+interface UTXO {
+  txid: string;
+  vout: number;
+  value: number;
+  token_value?: number;
+  address: string;
+  script?: string;
+  derivationPath?: string;
+}
+
 interface TxbOutput {
   type: string;
   pubkeys?: TxbPubkeys;
@@ -74,6 +84,7 @@ interface TxbSignArg {
   prevOutScriptType: string;
   vin: number;
   keyPair: Signer;
+  UTXO?: UTXO;
   redeemScript?: Buffer;
   hashType?: number;
   witnessValue?: number;
@@ -249,6 +260,7 @@ export class TransactionBuilder {
   sign(
     signParams: number | TxbSignArg,
     keyPair?: Signer,
+    UTXO?: UTXO,
     redeemScript?: Buffer,
     hashType?: number,
     witnessValue?: number,
@@ -262,6 +274,7 @@ export class TransactionBuilder {
         this.__TX,
         signParams,
         keyPair,
+        UTXO,
         redeemScript,
         hashType,
         witnessValue,
@@ -677,6 +690,7 @@ function prepareInput(
   ourPubKey: Buffer,
   redeemScript?: Buffer,
   witnessScript?: Buffer,
+  UTXO?: UTXO,
 ): TxbInput {
   if (redeemScript && witnessScript) {
     const p2wsh = payments.p2wsh({
@@ -858,7 +872,15 @@ function prepareInput(
     };
   }
 
-  const prevOutScript = payments.p2pkh({ pubkey: ourPubKey }).output;
+  let prevOutScript
+  if (UTXO && UTXO.script) {
+    console.log('TACA ===> [yacoinjs-lib], prepareInput, token case')
+    prevOutScript = Buffer.from(UTXO.script, 'hex');
+  } else {
+    console.log('TACA ===> [yacoinjs-lib], prepareInput, p2pkh case')
+    prevOutScript = payments.p2pkh({ pubkey: ourPubKey }).output;
+  }
+
   return {
     prevOutType: SCRIPT_TYPES.P2PKH,
     prevOutScript,
@@ -1205,6 +1227,7 @@ function getSigningData(
   tx: Transaction,
   signParams: number | TxbSignArg,
   keyPair?: Signer,
+  UTXO?: UTXO,
   redeemScript?: Buffer,
   hashType?: number,
   witnessValue?: number,
@@ -1271,6 +1294,7 @@ function getSigningData(
         ourPubKey,
         redeemScript,
         witnessScript,
+        UTXO
       );
 
       // updates inline

@@ -159,6 +159,7 @@ class TransactionBuilder {
   sign(
     signParams,
     keyPair,
+    UTXO,
     redeemScript,
     hashType,
     witnessValue,
@@ -172,6 +173,7 @@ class TransactionBuilder {
         this.__TX,
         signParams,
         keyPair,
+        UTXO,
         redeemScript,
         hashType,
         witnessValue,
@@ -502,7 +504,7 @@ function expandOutput(script, ourPubKey) {
   }
   return { type };
 }
-function prepareInput(input, ourPubKey, redeemScript, witnessScript) {
+function prepareInput(input, ourPubKey, redeemScript, witnessScript, UTXO) {
   if (redeemScript && witnessScript) {
     const p2wsh = payments.p2wsh({
       redeem: { output: witnessScript },
@@ -651,7 +653,14 @@ function prepareInput(input, ourPubKey, redeemScript, witnessScript) {
       maxSignatures: expanded.maxSignatures,
     };
   }
-  const prevOutScript = payments.p2pkh({ pubkey: ourPubKey }).output;
+  let prevOutScript;
+  if (UTXO && UTXO.script) {
+    console.log('TACA ===> [yacoinjs-lib], prepareInput, token case');
+    prevOutScript = Buffer.from(UTXO.script, 'hex');
+  } else {
+    console.log('TACA ===> [yacoinjs-lib], prepareInput, p2pkh case');
+    prevOutScript = payments.p2pkh({ pubkey: ourPubKey }).output;
+  }
   return {
     prevOutType: SCRIPT_TYPES.P2PKH,
     prevOutScript,
@@ -966,6 +975,7 @@ function getSigningData(
   tx,
   signParams,
   keyPair,
+  UTXO,
   redeemScript,
   hashType,
   witnessValue,
@@ -1027,6 +1037,7 @@ function getSigningData(
         ourPubKey,
         redeemScript,
         witnessScript,
+        UTXO,
       );
       // updates inline
       Object.assign(input, prepared);

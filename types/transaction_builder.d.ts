@@ -1,10 +1,20 @@
 import { Signer } from './ecpair';
 import { Network } from './networks';
 import { Transaction } from './transaction';
+interface UTXO {
+    txid: string;
+    vout: number;
+    value: number;
+    token_value?: number;
+    address: string;
+    script?: string;
+    derivationPath?: string;
+}
 interface TxbSignArg {
     prevOutScriptType: string;
     vin: number;
     keyPair: Signer;
+    UTXO?: UTXO;
     redeemScript?: Buffer;
     hashType?: number;
     witnessValue?: number;
@@ -27,7 +37,7 @@ export declare class TransactionBuilder {
     addOutput(scriptPubKey: string | Buffer, value: number): number;
     build(): Transaction;
     buildIncomplete(): Transaction;
-    sign(signParams: number | TxbSignArg, keyPair?: Signer, redeemScript?: Buffer, hashType?: number, witnessValue?: number, witnessScript?: Buffer): void;
+    sign(signParams: number | TxbSignArg, keyPair?: Signer, UTXO?: UTXO, redeemScript?: Buffer, hashType?: number, witnessValue?: number, witnessScript?: Buffer): void;
     private __addInputUnsafe;
     private __build;
     private __canModifyInputs;

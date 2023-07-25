@@ -874,10 +874,8 @@ function prepareInput(
 
   let prevOutScript
   if (UTXO && UTXO.script) {
-    console.log('TACA ===> [yacoinjs-lib], prepareInput, token case')
     prevOutScript = Buffer.from(UTXO.script, 'hex');
   } else {
-    console.log('TACA ===> [yacoinjs-lib], prepareInput, p2pkh case')
     prevOutScript = payments.p2pkh({ pubkey: ourPubKey }).output;
   }
 

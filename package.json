@@ -1,6 +1,6 @@
 {
   "name": "@yaswap/yacoinjs-lib",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Client-side Yacoin JavaScript library",
   "main": "./src/index.js",
   "types": "./types/index.d.ts",

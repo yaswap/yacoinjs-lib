@@ -30,11 +30,14 @@ export function isPushOnly(value: Stack): boolean {
   return types.Array(value) && value.every(isPushOnlyChunk);
 }
 
+// @ts-ignore YACOIN DOESN'T CHECK MINIMAL DATA
 function asMinimalOP(buffer: Buffer): number | void {
-  if (buffer.length === 0) return OPS.OP_0;
-  if (buffer.length !== 1) return;
-  if (buffer[0] >= 1 && buffer[0] <= 16) return OP_INT_BASE + buffer[0];
-  if (buffer[0] === 0x81) return OPS.OP_1NEGATE;
+  // YACOIN DOESN'T CHECK MINIMAL DATA
+  // if (buffer.length === 0) return OPS.OP_0;
+  // if (buffer.length !== 1) return;
+  // if (buffer[0] >= 1 && buffer[0] <= 16) return OP_INT_BASE + buffer[0];
+  // if (buffer[0] === 0x81) return OPS.OP_1NEGATE;
+  return
 }
 
 function chunksIsBuffer(buf: Buffer | Stack): buf is Buffer {
